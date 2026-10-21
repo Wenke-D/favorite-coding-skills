@@ -1,6 +1,6 @@
-# claude-skills
+# favorite-coding-skills
 
-Personal Claude Code skills, shared between machines.
+My favorite coding skills for Claude Code, shared between machines.
 
 | Skill | What it covers |
 | --- | --- |
@@ -10,8 +10,8 @@ Personal Claude Code skills, shared between machines.
 ## Install
 
 ```sh
-git clone <this repo> ~/projects/claude-skills
-~/projects/claude-skills/install.sh
+git clone <this repo> ~/projects/favorite-coding-skills
+~/projects/favorite-coding-skills/install.sh
 ```
 
 `install.sh` symlinks each `skills/<name>` into `~/.claude/skills/<name>`
