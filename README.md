@@ -17,3 +17,7 @@ git clone <this repo> ~/projects/favorite-coding-skills
 `install.sh` symlinks each `skills/<name>` into `~/.claude/skills/<name>`
 (or `$CLAUDE_CONFIG_DIR/skills`). Re-run it after adding a skill. Editing a
 skill through `~/.claude/skills` edits this repo; commit and push from here.
+
+## Acknowledgements
+
+LLMs and AI agents have assisted in contributing to this project.
