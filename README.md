@@ -6,6 +6,7 @@ My favorite coding skills for Claude Code, shared between machines.
 | --- | --- |
 | `coding-guidelines` | One file, one thing; comments kept to a strict minimum. All languages. |
 | `cpp-style` | Plain C++17, naming, data members via `this->`, library layout, includes, third-party frameworks as plain libraries. |
+| `recap` | Catches up on the last topic of the previous chat from its saved transcript, checked against git. |
 
 ## Install
 
