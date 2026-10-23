@@ -7,6 +7,7 @@ My favorite coding skills for Claude Code, shared between machines.
 | `coding-guidelines` | One file, one thing, and how to split a file; comments kept to a strict minimum. All languages. |
 | `cpp-coding` | Plain C++20, naming, data members via `this->`, library layout, includes, third-party frameworks as plain libraries. |
 | `rust-coding` | One thing per file in Rust terms, a trait apart from its impls, `mod.rs` with flat re-exports, visibility. |
+| `scripting` | Shell only for a few commands in a row, Python once a script gets complex; style for both. |
 | `recap` | Catches up on the last topic of a previous chat from its saved transcript, checked against git, and carries on with it when asked. |
 | `memory-cleanup` | Prunes a project's memory to what the code and docs can't tell, then fixes its links and index. |
 | `doc-writing` | The process for technical documents: check each claim against the source, choose the reader, draft section by section, test the draft on a fresh reader. `asd-ste100` sets the prose. |

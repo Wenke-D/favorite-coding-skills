@@ -8,7 +8,8 @@ description: Coding rules for every language and project. Use whenever writing, 
 These hold for every language. A language skill (`cpp-coding` for C++,
 `rust-coding` for Rust) adds its own rules and wins where the two differ; a
 project's CLAUDE.md or memory wins over both. When writing C++ or Rust, load
-`cpp-coding` or `rust-coding` too.
+`cpp-coding` or `rust-coding` too; when writing a shell or Python script, load
+`scripting`.
 
 ## One file, one thing
 
