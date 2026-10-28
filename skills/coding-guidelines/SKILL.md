@@ -1,13 +1,14 @@
 ---
 name: coding-guidelines
-description: General coding guidelines for every language and project - modularity by file (one file holds one thing, named after it; a second responsibility goes into its own file) and comments kept to a strict minimum (only on non-trivial code, functions whose arguments are not self-explanatory, and class definitions and their members; existing comments stay unless they belong to the code being changed). Use whenever writing, editing, refactoring or reviewing code in any language, alongside the language's own style skill such as cpp-style.
+description: General coding guidelines for every language and project - modularity by file (one file holds one thing, named after it; a second responsibility goes into its own file; a split is a pure move, verified by build and tests) and comments kept to a strict minimum (only on non-trivial code, functions whose arguments are not self-explanatory, and class definitions and their members; existing comments stay unless they belong to the code being changed). Use whenever writing, editing, refactoring, splitting or reviewing code in any language, alongside the language's own style skill such as cpp-style or rust-style.
 ---
 
 # Coding guidelines
 
-These hold for every language. A language skill (`cpp-style` for C++) adds
-its own rules and wins where the two differ; a project's CLAUDE.md or memory
-wins over both. When writing C++, load `cpp-style` too.
+These hold for every language. A language skill (`cpp-style` for C++,
+`rust-style` for Rust) adds its own rules and wins where the two differ; a
+project's CLAUDE.md or memory wins over both. When writing C++ or Rust, load
+`cpp-style` or `rust-style` too.
 
 ## One file, one thing
 
@@ -34,9 +35,21 @@ Modularity starts at the file: each file holds one thing.
 - **Directories group the files of one larger thing,** for example a model
   and the parts only it uses in `models/fsd/`, so the tree reads like the
   list of what the code does.
-- **Splitting existing code is its own change.** When a file you touch
-  already mixes things, point it out or split it in a separate commit,
-  apart from changes in behaviour, so each diff stays easy to review.
+
+## Splitting existing code
+
+When a file you touch already mixes things, point it out or split it in a
+separate commit, apart from changes in behaviour, so each diff stays easy to
+review. The split itself:
+
+- **A pure move.** No behaviour changes and no public path changes.
+- **Comments travel with their code.** A section header in the old file
+  becomes the new file's one-line comment.
+- **Verify it:** the build gives no new warnings, the tests pass, any
+  end-to-end script gives the same output before and after (diff it), and
+  any count the project tracks stays the same.
+- **Record it** in the project's journal if it keeps one (usually its
+  CLAUDE.md).
 
 ## Comments
 
