@@ -1,6 +1,6 @@
 ---
-name: cpp-style
-description: C++ style for the user's own projects, covering naming, class data members, headers and includes, library layout under CMake, and how to use frameworks such as OpenFOAM or Qt in project code. Use whenever writing, editing, porting, reviewing or restructuring C++ code (.cpp, .hpp, .H, .C files) or its CMakeLists.txt, even for a small edit, and whenever deciding how a C++ class, library or include should look.
+name: cpp-coding
+description: Use along side the coding guideline skill for any C++ project (.cpp, .hpp) and OpenFoam(.H, .C files).
 ---
 
 # C++ style
@@ -10,7 +10,7 @@ These rules cover a project's own C++ code. Load the general
 project's CLAUDE.md or memory can add to both or override them; follow the
 project where they differ.
 
-## Plain C++17
+## Plain C++20
 
 - Use the standard library: `std::unique_ptr`, `std::string`, `std::vector`,
   `std::optional`, and exceptions for errors.

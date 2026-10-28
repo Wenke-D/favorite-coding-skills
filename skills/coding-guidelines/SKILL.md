@@ -1,14 +1,14 @@
 ---
 name: coding-guidelines
-description: Coding rules for every language and project, covering how code is divided into files, how an existing file is split, and when to write a comment. Use whenever writing, editing, refactoring, moving, splitting or reviewing code in any language, even a one-line fix, together with the language's own style skill (cpp-style, rust-style). Also use when deciding where new code should go, whether a file should be split, or whether a comment is needed, e.g. "这段代码放哪个文件", "把这个文件拆一下", "这里要不要加注释".
+description: Coding rules for every language and project. Use whenever writing, editing, commenting, refactoring or reviewing code, even a one-line fix.
 ---
 
 # Coding guidelines
 
-These hold for every language. A language skill (`cpp-style` for C++,
-`rust-style` for Rust) adds its own rules and wins where the two differ; a
+These hold for every language. A language skill (`cpp-coding` for C++,
+`rust-coding` for Rust) adds its own rules and wins where the two differ; a
 project's CLAUDE.md or memory wins over both. When writing C++ or Rust, load
-`cpp-style` or `rust-style` too.
+`cpp-coding` or `rust-coding` too.
 
 ## One file, one thing
 

@@ -1,5 +1,5 @@
 ---
-name: rust-style
+name: rust-coding
 description: Rust style for the user's own projects, covering what goes in one file, where a trait and its impls live, what mod.rs holds, and visibility. Use whenever writing, editing, reviewing, splitting or restructuring Rust code (.rs files, modules, crates), even for a small edit, and whenever deciding which file or module new Rust code belongs in.
 ---
 
