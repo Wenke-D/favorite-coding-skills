@@ -1,12 +1,14 @@
 ---
 name: recap
-description: Catch up on the last topic of the previous Claude Code chat in this project - reads that chat's saved transcript, finds where its last topic began, and recaps only that topic (what was asked, what was done or decided, where it stopped, what comes next), checked against git. Use when the user runs /recap or opens a chat with "where were we", "catch up", "recap the last chat" or "continue from last time". Read-only; it saves no memory.
+description: Recaps the last topic of a previous Claude Code chat in this project from its saved transcript, checked against git, and carries on with that work when asked. Use when the user runs /recap, asks where the last chat stopped, or wants to continue or finish it, e.g. "where were we", "catch up", "continue from last time", "上次聊到哪了", "接着上个对话", "把上次的任务做完", or refers to something from an earlier chat that is not in the current context. Use it instead of reading the .jsonl transcripts under ~/.claude/projects.
 ---
 
 # Recap
 
-Bring the user back to where the last chat stopped, on its last topic only.
-Earlier topics of that chat stay out of the recap.
+Bring the user back to where a previous chat stopped, on one topic: the
+chat's last, unless the user names another. Earlier topics stay out of the
+recap. When the user asked to continue or finish that work, the recap is a
+checkpoint and the work goes on in the same turn.
 
 ## Steps
 
@@ -17,16 +19,20 @@ Earlier topics of that chat stay out of the recap.
    python3 <skill base directory>/recap.py
    ```
 
-   Add `--back 2` (3, ...) when the user means an older chat, or when the
-   listed chat is plainly not the one they mean: several chats can run at
-   once, and the last one is the one written to most recently.
+   When the user means an older chat, or the listed chat is plainly not the
+   one they mean, run it with `--list` for the recent chats and their ids,
+   then add `--chat <id>` here and in step 3. Several chats can run
+   at once, and the last one is the one written to most recently. If the
+   skill was invoked with an argument, a hex prefix is a chat id and
+   anything else names the topic to look for.
 
-2. Find where the last topic starts. Read the prompts from the bottom up and
-   stop at the latest one that opens a new subject: a new task or question,
-   "regarding X", "now let's ...", "next". Short follow-ups ("yes, do it",
-   "ok", "also ...", a correction, a pasted error) belong to the topic above
-   them. If the last prompt opens a new subject, the topic is that prompt
-   alone.
+2. Find where the topic starts. If the user named a topic, it starts at the
+   prompt that first raises it. Otherwise read the prompts from the bottom
+   up and stop at the latest one that opens a new subject: a new task or
+   question, "regarding X", "now let's ...", "next". Short follow-ups ("yes,
+   do it", "ok", "also ...", a correction, a pasted error) belong to the
+   topic above them. If the last prompt opens a new subject, the topic is
+   that prompt alone.
 
 3. Print that topic in detail, `N` being the prompt it starts at:
 
@@ -47,12 +53,21 @@ Earlier topics of that chat stay out of the recap.
    - **Next:** the step the last reply proposed, or the one that plainly
      follows.
 
-   Then stop and let the user say what to do. Don't start the next step.
+6. Then go by what the user asked for:
+   - Where things stopped ("where were we", "上次聊到哪了", a bare
+     `/recap`): stop and let the user say what to do. Don't start the next
+     step.
+   - To continue or finish the work ("continue from last time", "接着上次的",
+     "把上次的任务做完"): go on with **Next** in the same turn, as with any
+     other task.
 
 ## Rules
 
-- Only the last topic. No section on what came before it.
-- The transcript and git are the sources; don't open source files.
+- One topic only. No section on what came before it.
+- The recap comes from the transcript and git alone; open source files only
+  once you go on with the work.
+- Read transcripts only through `recap.py`, never the `.jsonl` files
+  themselves: they run to megabytes, almost all of it tool output.
 - Say where git disagrees with the last reply, e.g. something it called
   uncommitted has been committed since.
 - Save no memory. Ongoing progress is what /recap is for; memory is for

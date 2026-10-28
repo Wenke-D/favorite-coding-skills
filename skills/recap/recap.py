@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Shows the previous Claude Code chat of this project, for /recap.
+"""Shows a previous Claude Code chat of this project, for /recap.
 
-Without --from it lists the chat's prompts, numbered; with --from N it prints
-the topic that starts at prompt N: each prompt, the reply that closed it and
-the files the topic changed.
+With --list it lists the recent chats. Otherwise, for the last chat or the one
+--chat names: without --from it lists the chat's prompts, numbered; with
+--from N it prints the topic that starts at prompt N: each prompt, the reply
+that closed it and the files the topic changed.
 """
 import argparse
 import json
@@ -43,18 +44,24 @@ def transcript_dir():
     return projects / re.sub(r"[^A-Za-z0-9]", "-", os.getcwd())
 
 
-def previous_session(back):
-    """The transcript `back` chats before the running one (1 = the last chat)."""
+def previous_sessions():
+    """This project's transcripts other than the running chat's, newest first."""
     folder = transcript_dir()
     current = os.environ.get("CLAUDE_CODE_SESSION_ID")
-    sessions = sorted(
+    return sorted(
         (f for f in folder.glob("*.jsonl") if f.stem != current),
         key=lambda f: f.stat().st_mtime,
         reverse=True,
     )
-    if len(sessions) < back:
-        sys.exit(f"no chat {back} back in {folder}")
-    return sessions[back - 1]
+
+
+def pick_session(prefix):
+    """The newest transcript whose id starts with `prefix`; the last chat's when it is None."""
+    sessions = [f for f in previous_sessions() if f.stem.startswith(prefix or "")]
+    if not sessions:
+        wanted = f"chat {prefix}" if prefix else "earlier chat"
+        sys.exit(f"no {wanted} in {transcript_dir()}")
+    return sessions[0]
 
 
 def records(path):
@@ -125,6 +132,17 @@ def is_work_file(path):
     return not path.startswith((tempfile.gettempdir() + os.sep, str(transcript_dir()) + os.sep))
 
 
+def print_chats(count):
+    sessions = previous_sessions()[:count]
+    if not sessions:
+        sys.exit(f"no earlier chat in {transcript_dir()}")
+    for path in sessions:
+        title, _, turns = read_session(path)
+        when = datetime.fromtimestamp(path.stat().st_mtime).strftime("%m-%d %H:%M")
+        last = clip(" ".join(turns[-1].prompt.split()), LIST_WIDTH) if turns else ""
+        print(f"{path.stem[:8]}  {when}  {len(turns):3} prompts  {title or '(no title)'}\n    last: {last}")
+
+
 def print_prompts(turns):
     for number, turn in enumerate(turns, 1):
         print(f"[{number}] {local(turn.time, '%H:%M')}  {clip(' '.join(turn.prompt.split()), LIST_WIDTH)}")
@@ -151,11 +169,16 @@ def print_topic(turns, start):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--back", type=int, default=1, help="how many chats back, 1 = the last chat")
+    parser.add_argument("--list", dest="count", type=int, nargs="?", const=8,
+                        help="list the last COUNT chats (default 8) with their ids")
+    parser.add_argument("--chat", help="the chat whose id starts with this, from --list; default the last chat")
     parser.add_argument("--from", dest="start", type=int, help="print the topic that starts at this prompt")
     args = parser.parse_args()
 
-    path = previous_session(args.back)
+    if args.count is not None:
+        print_chats(args.count)
+        return
+    path = pick_session(args.chat)
     title, end, turns = read_session(path)
     if not turns:
         sys.exit(f"{path.name} holds no prompts")
