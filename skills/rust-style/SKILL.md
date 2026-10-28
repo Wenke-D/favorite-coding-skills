@@ -1,6 +1,6 @@
 ---
 name: rust-style
-description: Rust coding style for all projects - what one thing per file means in Rust (a type with its inherent methods, a trait, a group of impls, a macro or a free function), a trait in its own file apart from its impls, a type with several concerns spread over impl blocks in separate files, mod.rs holding only the module doc, the mod declarations and flat re-exports of private submodules, and pub(super) for the internals of a public type. Use whenever writing, reviewing, splitting or restructuring Rust code, even for a small edit.
+description: Rust style for the user's own projects, covering what goes in one file, where a trait and its impls live, what mod.rs holds, and visibility. Use whenever writing, editing, reviewing, splitting or restructuring Rust code (.rs files, modules, crates), even for a small edit, and whenever deciding which file or module new Rust code belongs in.
 ---
 
 # Rust style

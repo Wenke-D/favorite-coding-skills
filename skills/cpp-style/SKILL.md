@@ -1,6 +1,6 @@
 ---
 name: cpp-style
-description: C++ coding style for all projects - plain modern C++17 (std types, exceptions), no factory, registry or run-time selection machinery unless there are real alternatives to choose between, snake_case for files, functions and variables and UpperCamelCase for types, class data members snake_case_ with a trailing underscore and always used through this->, each library split into include/<name>/ and src/ with only its own include/ public, "" includes only within the same target and <> for everything else, and third-party frameworks (OpenFOAM, Qt, ...) used as plain libraries without adopting their conventions. Use whenever writing, porting, reviewing or restructuring C++ code or its CMake build, even for a small edit.
+description: C++ style for the user's own projects, covering naming, class data members, headers and includes, library layout under CMake, and how to use frameworks such as OpenFOAM or Qt in project code. Use whenever writing, editing, porting, reviewing or restructuring C++ code (.cpp, .hpp, .H, .C files) or its CMakeLists.txt, even for a small edit, and whenever deciding how a C++ class, library or include should look.
 ---
 
 # C++ style

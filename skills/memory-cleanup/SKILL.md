@@ -1,6 +1,6 @@
 ---
 name: memory-cleanup
-description: Clean up this project's Claude Code memory - backs it up, then drops ongoing progress (that is /recap's job), what the code or docs already establish, history and stale facts, merges duplicates, hands open to-dos to the project's docs, and keeps only what the repos can't tell (preferences, rules, reasons, facts outside the repos, milestones); then fixes links and the MEMORY.md index. Use when the user runs /memory-cleanup or asks to clean up, tidy, prune or review memory.
+description: Prunes this project's Claude Code memory to what the code and docs don't already record, then fixes its links and the MEMORY.md index. Use when the user runs /memory-cleanup or asks to clean up, tidy, prune, shrink or review memory, e.g. "清理一下 memory", "整理记忆", "memory 太乱了", or says memories are stale, duplicated or wrong.
 ---
 
 # Memory cleanup

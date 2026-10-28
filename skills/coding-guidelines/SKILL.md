@@ -1,6 +1,6 @@
 ---
 name: coding-guidelines
-description: General coding guidelines for every language and project - modularity by file (one file holds one thing, named after it; a second responsibility goes into its own file; a split is a pure move, verified by build and tests) and comments kept to a strict minimum (only on non-trivial code, functions whose arguments are not self-explanatory, and class definitions and their members; existing comments stay unless they belong to the code being changed). Use whenever writing, editing, refactoring, splitting or reviewing code in any language, alongside the language's own style skill such as cpp-style or rust-style.
+description: Coding rules for every language and project, covering how code is divided into files, how an existing file is split, and when to write a comment. Use whenever writing, editing, refactoring, moving, splitting or reviewing code in any language, even a one-line fix, together with the language's own style skill (cpp-style, rust-style). Also use when deciding where new code should go, whether a file should be split, or whether a comment is needed, e.g. "这段代码放哪个文件", "把这个文件拆一下", "这里要不要加注释".
 ---
 
 # Coding guidelines
