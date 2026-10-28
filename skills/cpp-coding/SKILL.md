@@ -1,6 +1,6 @@
 ---
 name: cpp-coding
-description: Use along side the coding guideline skill for any C++ project (.cpp, .hpp) and OpenFoam(.H, .C files).
+description: Use alongside coding-guidelines for any C++ project (.cpp, .hpp) and OpenFOAM (.H, .C files).
 ---
 
 # C++ style
