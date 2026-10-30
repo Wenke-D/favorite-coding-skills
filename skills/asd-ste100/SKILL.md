@@ -1,6 +1,6 @@
 ---
 name: asd-ste100
-description: "Use when English text must be parsed without a human to resolve ambiguity — tool descriptions, error messages, inter-agent instructions, system prompts, status reports — and misreading has a real cost, or when text reads as dense, hedged, or easy to misparse. Triggers: disambiguate, STE100 rewrite, apply Simplified Technical English, plain-language rewrite, controlled-language rewrite, rewrite so an agent cannot misread this. Not for creative or marketing copy."
+description: Writes and rewrites technical English in Simplified Technical English (ASD-STE100), whether a person or an agent reads it. Use for any technical text, such as documentation, READMEs, specs, PR descriptions, tool descriptions, error messages, prompts and status reports. Also use when text reads as dense, hedged or easy to misparse. Not for creative or marketing copy.
 version: 0.4.0
 ---
 
@@ -8,10 +8,16 @@ version: 0.4.0
 
 ASD-STE100 is a controlled-language standard built by the aerospace and defense industry (ASD, the AeroSpace and Defense Industries Association of Europe) to stop maintenance technicians from misreading English instructions. The standard removes the two biggest sources of misreading: words with more than one meaning, and sentences with more than one possible structure.
 
-This skill borrows that same discipline for a different reader: an **AI agent or a downstream system** that has to parse an English string — an error message, a tool description, an inter-agent instruction, a status report — without a human in the loop to resolve ambiguity. If a maintenance technician can misread "close the valve" as an adjective ("the valve that is near") instead of a command, so can a language model.
+This skill applies the same discipline to all technical English, for two kinds of reader:
+
+- **A person** who reads technical documentation: a README, a design doc, a spec, a guide, a PR description. ASD wrote STE for people in the first place. This reader cannot ask the author what a sentence means either. Readers who are not native English speakers, and readers who use a translation tool, are the most likely to misread ambiguous English.
+- **An AI agent or a downstream system** that has to parse an English string — an error message, a tool description, an inter-agent instruction, a status report — without a human in the loop to resolve ambiguity. If a maintenance technician can misread "close the valve" as an adjective ("the valve that is near") instead of a command, so can a language model.
+
+Both readers get the same rules. The text type sets how strictly they apply (see Two Modes). A human reader is not a reason to skip this skill.
 
 ## When to Use This Skill
 
+- You write or revise technical documentation for people: a README, a design doc, a spec, a guide, a PR description, a changelog.
 - An agent's output (explanation, instruction, log message, tool description) reads as dense, jargon-heavy, or ambiguous.
 - Text will be consumed by another agent, a translation pipeline, or a non-native English reader, and misparsing has a real cost.
 - You are writing a prompt, system message, or tool description and want to remove ambiguity before a model ever sees it.
@@ -25,7 +31,9 @@ Pick a mode before rewriting. If the user does not say which, infer it from the 
 
 **Strict** — procedures, error messages, tool and function descriptions, inter-agent instructions, safety text. Anywhere a wrong reading has a cost. Apply every rule below, including the hard length caps and one-word-one-meaning discipline.
 
-**STE-flavored** — READMEs, PR descriptions, changelogs, explanatory prose. Apply the structural rules in full and treat the lexical rules as advisory (see Core Rewrite Rules for that split). In practice that means keeping the sentence length caps, active voice, simple tenses, no phrasal verbs, no semicolons, no nominalization and no marketing adjectives, while dropping the one-word-one-meaning lockdown: prose needs some range, and a strict rewrite of prose reads as a personality transplant rather than a clarification.
+**STE-flavored** — READMEs, design docs, specs, guides, PR descriptions, changelogs, explanatory prose. Apply the structural rules in full and treat the lexical rules as advisory (see Core Rewrite Rules for that split). In practice that means keeping the sentence length caps, active voice, simple tenses, no phrasal verbs, no semicolons, no nominalization and no marketing adjectives, while dropping the one-word-one-meaning lockdown: prose needs some range, and a strict rewrite of prose reads as a personality transplant rather than a clarification.
+
+A document can contain both kinds of text. In a README with installation steps, apply Strict to the steps and STE-flavored to the rest.
 
 The two modes and the structural/lexical split are the same distinction seen from two directions. The split says which rules this skill can verify without ASD's dictionary. The modes say which of them to enforce for a given kind of text.
 
@@ -86,6 +94,8 @@ These six habits cover most of what makes machine-written English hard to parse.
 
 ## Process
 
+When you write new text instead of rewriting existing text, apply the rules while you draft. Then do steps 3 to 6 on the draft.
+
 1. Pick the mode (Strict or STE-flavored). Say which only when the user asked for the rule table — see Output Format.
 2. Read the input text once for meaning — do not start rewriting before you understand what it must still say afterward.
 3. Walk it sentence by sentence. Flag every rule violation from the Core Rewrite Rules tables and every habit from the Scan Checklist. In STE-flavored mode, flag the lexical rules but do not enforce them. For a mechanical first pass over the structural rules, run `scripts/ste-lint.py` (stdin or file args, `--json` for structured output); it checks semicolons, sentence length, phrasal verbs, nominalization, marketing adjectives, synonym rotation, dangling-conjunction in supported list items, passive voice, and compound tenses, and by design never flags hedges or modality. `--baseline N` tolerates N hard violations (for adopting on existing docs); `--disable rule1,rule2` silences named rules.
@@ -97,7 +107,7 @@ These six habits cover most of what makes machine-written English hard to parse.
 
 ## Output Format
 
-**Default: the rewritten text, and nothing else.** Most callers want a result they can paste straight into a tool description, an error string, or a prompt. Print the simplified text on its own. Do not add a preamble about this skill, a mode announcement, a violation count, a summary of what changed, a rule table, or a closing offer to explain further.
+**Default: the rewritten text, and nothing else.** Most callers want a result they can paste straight into a document, a tool description, an error string, or a prompt. Print the simplified text on its own. Do not add a preamble about this skill, a mode announcement, a violation count, a summary of what changed, a rule table, or a closing offer to explain further.
 
 The one permitted addition: if step 4 kept a longer phrasing on purpose, add a single line after the text, prefixed `Kept as-is:`, naming the phrase and the precision that would have been lost. Omit the line when there is nothing to report.
 
