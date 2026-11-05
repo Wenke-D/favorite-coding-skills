@@ -14,6 +14,7 @@ My favorite coding skills for Claude Code, shared between machines.
 | `typst-assistant` | Watches a Typst project for `// @ai` notes in the source, does what each note asks, checks the rendered page and answers under the note. |
 | `doc-writing` | The process for technical documents: check each claim against the source, choose the reader, draft section by section, test the draft on a fresh reader. `asd-ste100` sets the prose. |
 | `asd-ste100` | Writes and rewrites technical English in Simplified Technical English, for people and agents: one instruction per sentence, short sentences, active voice, no semicolons. Third party, see below. |
+| `business-writing` | Writes and rewrites Chinese business text for clients and partners, such as decks, proposals and letters. Fixes colloquial words, template-like phrasing and weak positioning, and keeps every fact and number. One reference file is third party, see below. |
 
 ## Install
 
@@ -39,6 +40,11 @@ documentation for people. To update the copy, copy `LICENSE`, `examples/` and
 `scripts/` from a newer upstream commit. Merge the upstream changes to
 `SKILL.md` and `references/writing-rules.md` by hand, so that the extended
 scope stays. Then change the commit here.
+
+`skills/business-writing/references/ai-patterns.md` adapts 12 of the 31
+checks in [op7418/Humanizer-zh](https://github.com/op7418/Humanizer-zh) at
+commit `f4518a8`, with new examples for business text. The upstream MIT
+license is in `skills/business-writing/references/LICENSE-humanizer-zh`.
 
 ## Acknowledgements
 
