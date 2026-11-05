@@ -1,6 +1,6 @@
 ---
 name: doc-writing
-description: Process for writing, rewriting or reviewing technical documentation such as READMEs, design docs, specs, guides and PR descriptions. Use whenever you draft or revise documentation, including requests like 写文档, 重写 README or 改一下这段说明.
+description: Process for writing, rewriting or reviewing technical documentation such as READMEs, design docs, specs and guides. Use whenever you draft or revise documentation, including requests like 写文档, 重写 README or 改一下这段说明. Not for commit messages or PR descriptions (use commit).
 ---
 
 # Writing technical documentation
@@ -15,7 +15,7 @@ This skill is the process: what goes into a document, how to check it, and how t
 
 ## Pick the process by size
 
-Small jobs are a docstring, one section, a README for code you can read, a PR description. Do these without an interview. Read the source, draft the whole thing, rewrite the prose with asd-ste100, run one round of the reader test (skip it only for a few sentences), and report. Ask only what the source cannot tell you, such as the audience or how the project wants to position itself, and ask it once, up front, as a short numbered list. If nobody can answer, go ahead and list the questions in the report.
+Small jobs are a docstring, one section, a README for code you can read. Do these without an interview. Read the source, draft the whole thing, rewrite the prose with asd-ste100, run one round of the reader test (skip it only for a few sentences), and report. Ask only what the source cannot tell you, such as the audience or how the project wants to position itself, and ask it once, up front, as a short numbered list. If nobody can answer, go ahead and list the questions in the report.
 
 Substantial documents are design docs, specs, proposals, decision docs, and anything whose facts live mostly in the user's head. Offer the co-authoring workflow below in a sentence or two and let the user pick it or freeform. With freeform, still run the reader test at the end.
 
