@@ -11,6 +11,7 @@ My favorite coding skills for Claude Code, shared between machines.
 | `recap` | Catches up on the last topic of a previous chat from its saved transcript, checked against git, and carries on with it when asked. |
 | `memory-cleanup` | Prunes a project's memory to what the code and docs can't tell, then fixes its links and index. |
 | `commit` | Writes commit messages and PR titles and descriptions in English and Simplified Technical English. A subject line starts with a type tag (`[feat]`, `[fix]`, `[doc]`, `[refactor]`, `[test]` or `[chore]`) and a list of the changes follows it. |
+| `typst-assistant` | Watches a Typst project for `// @ai` notes in the source, does what each note asks, checks the rendered page and answers under the note. |
 | `doc-writing` | The process for technical documents: check each claim against the source, choose the reader, draft section by section, test the draft on a fresh reader. `asd-ste100` sets the prose. |
 | `asd-ste100` | Writes and rewrites technical English in Simplified Technical English, for people and agents: one instruction per sentence, short sentences, active voice, no semicolons. Third party, see below. |
 
