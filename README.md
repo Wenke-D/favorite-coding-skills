@@ -14,6 +14,7 @@ My favorite coding skills for Claude Code, shared between machines.
 | `typst-assistant` | Watches a Typst project for `// @ai` notes in the source, does what each note asks, checks the rendered page and answers under the note. |
 | `doc-writing` | The process for technical documents: check each claim against the source, choose the reader, draft section by section, test the draft on a fresh reader. `asd-ste100` sets the prose. |
 | `asd-ste100` | Writes and rewrites technical English in Simplified Technical English, for people and agents: one instruction per sentence, short sentences, active voice, no semicolons. Third party, see below. |
+| `gui-testing` | Looks at and drives GUI apps on macOS while the user keeps working: headless Chrome, Electron apps in a background mode (invisible, never active, dialogs and menus stubbed), and screenshots of any window. Pages are driven over the Chrome DevTools Protocol. |
 | `business-writing` | Writes and rewrites Chinese business text for clients and partners, such as decks, proposals and letters. Fixes colloquial words, template-like phrasing and weak positioning, and keeps every fact and number. One reference file is third party, see below. |
 
 ## Install
