@@ -1,6 +1,6 @@
 ---
 name: coding-guidelines
-description: Coding rules for every language and project. Use whenever writing, editing, commenting, refactoring or reviewing code, even a one-line fix.
+description: Coding rules for every project. They cover programming languages, scripts and build system files. Use whenever writing, editing, moving, commenting, refactoring or reviewing such code, even a one-line fix.
 ---
 
 # Coding guidelines
