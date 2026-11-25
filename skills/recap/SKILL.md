@@ -1,6 +1,6 @@
 ---
 name: recap
-description: Recaps one topic of a previous Claude Code chat in this project, so that the current chat has its context. Use when the user wants to catch up on a topic from an earlier chat, or on how far it got. Use it instead of reading the project's .jsonl transcripts.
+description: Recaps one topic of a previous chat with a coding agent (Claude Code or the Antigravity CLI) in this project, so that the current chat has its context. Use when the user wants to catch up on a topic from an earlier chat, or on how far it got. Use it instead of reading the agent's transcript files.
 
 ---
 
@@ -14,10 +14,15 @@ user asks for a recap in one of two ways:
 - **With a topic**, e.g. "recap the login bug": the target is that topic in
   one of this project's chats. Follow [Recap with a topic](#recap-with-a-topic).
 
-Read the chats with `recap.py`, in this skill's base directory. Run it as
-`python3 <skill base directory>/recap.py`. `recap.py --help` shows what each
+Read the chats with `recap.py`, in the folder of this `SKILL.md` file. Run it
+as `python3 <that folder>/recap.py`. `recap.py --help` shows what each
 command prints and what each option does. Run it when the output is not
 clear or you need another option.
+
+`recap.py` reads the chats of the agent that runs it, Claude Code or the
+Antigravity CLI. To read the chats of the other agent, add
+`--agent claude-code` or `--agent antigravity`. Do this when the user says
+that the earlier work was with the other agent.
 
 ## Topics
 
@@ -46,8 +51,9 @@ A topic covers these prompts:
 ## Recap with a topic
 
 1. Run `recap.py --search '<pattern>'`. If no chat matches, try other
-   words, such as related terms, synonyms or the other language, before you
-   tell the user.
+   words, such as related terms, synonyms or the other language. Then try
+   the other agent with `--agent`. Tell the user only when these also find
+   no chat.
 2. Pick the chat that matches best. The topic starts at the prompt `N` that
    first raises it. To find where it ends, list the prompts of that chat
    with `recap.py --chat <id> --from N --brief`.
@@ -80,7 +86,8 @@ A topic covers these prompts:
 - One topic only. No section on what came before it.
 - Write the recap from the transcript and git only. Do not open source files
   for it.
-- Read transcripts only through `recap.py`, never the `.jsonl` files
-  themselves. They are megabytes in size, and almost all of it is tool
-  output.
+- Read transcripts only through `recap.py`, never the files themselves:
+  the `.jsonl` files of Claude Code or the `.db` files of the Antigravity
+  CLI. They are large, and almost all of their content is tool output and
+  the agent's own context.
 - Say where git disagrees with the last reply, e.g. the last reply calls a change not committed, but it is committed now.

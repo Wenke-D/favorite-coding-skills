@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Shows a previous Claude Code chat of this project, for /recap.
+"""Shows a previous chat of this project with a coding agent, for the recap skill.
 
-The chats are those of this project's transcript folder: every chat started in
+The chats are those of the running agent, Claude Code or the Antigravity CLI;
+--agent reads the other agent's chats instead. They are the chats started in
 this directory, except the running one. A chat is named by the first 8
 characters of its id, and its prompts are numbered from 1.
 
@@ -36,8 +37,10 @@ import sys
 import tempfile
 from datetime import datetime
 
+import antigravity_chats
 import claude_code_chats
 
+AGENTS = {"claude-code": claude_code_chats, "antigravity": antigravity_chats}
 LIST_WIDTH = 160
 TEXT_LIMIT = 1500
 # A range longer than LONG_RANGE turns clips the replies before its last to SHORT_LIMIT.
@@ -197,8 +200,11 @@ def main():
     style = parser.add_mutually_exclusive_group()
     style.add_argument("--brief", action="store_true", help="with --from, one line per prompt")
     style.add_argument("--full", action="store_true", help="no clipping, and every text and tool call of each turn")
+    parser.add_argument("--agent", choices=AGENTS,
+                        default="antigravity" if os.environ.get("ANTIGRAVITY_AGENT") else "claude-code",
+                        help="the agent whose chats to read; default the running one")
     args = parser.parse_args()
-    chats = claude_code_chats
+    chats = AGENTS[args.agent]
 
     if args.search is not None:
         if args.chat or args.start is not None or args.end is not None or args.brief or args.full:

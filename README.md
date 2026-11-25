@@ -1,6 +1,7 @@
 # favorite-coding-skills
 
-My favorite coding skills for Claude Code, shared between machines.
+My favorite coding skills for Claude Code and the Antigravity CLI (`agy`),
+shared between machines.
 
 | Skill | What it covers |
 | --- | --- |
@@ -24,9 +25,20 @@ git clone <this repo> ~/projects/favorite-coding-skills
 ~/projects/favorite-coding-skills/install.sh
 ```
 
-`install.sh` symlinks each `skills/<name>` into `~/.claude/skills/<name>`
-(or `$CLAUDE_CONFIG_DIR/skills`). Re-run it after adding a skill. Editing a
-skill through `~/.claude/skills` edits this repo; commit and push from here.
+`install.sh` symlinks each `skills/<name>` into two folders:
+
+- `~/.claude/skills/<name>` (or `$CLAUDE_CONFIG_DIR/skills`) for Claude Code;
+- `~/.gemini/config/skills/<name>` for Antigravity: the CLI, the app and the
+  IDE all read it.
+
+Re-run it after adding a skill. In a running `agy`, run `/skills reload`
+after that. Editing a skill through either folder edits this repo; commit
+and push from here.
+
+`recap` reads the saved chats of both agents. For Antigravity it reads the
+CLI's own databases, whose format has no documentation, so a new CLI version
+can break it. `memory-cleanup` works on the memory folder of Claude Code.
+Antigravity has no memory folder of its own.
 
 ## Third-party skills
 
