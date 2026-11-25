@@ -30,19 +30,14 @@ of files the turn changed, "no answer" when the assistant wrote nothing, and
 A note in the output tells how to see what it leaves out.
 """
 import argparse
-import functools
-import json
 import os
 import re
 import sys
 import tempfile
 from datetime import datetime
-from pathlib import Path
 
-INJECTED = re.compile(r"<(ide_\w+|system-reminder|task-notification)>.*?</\1>", re.S)
-FILE_TOOLS = ("Edit", "MultiEdit", "Write", "NotebookEdit")
-# The tool inputs that say most about a call, in order of preference.
-TOOL_ARGS = ("command", "file_path", "pattern", "url", "query", "description", "prompt")
+import claude_code_chats
+
 LIST_WIDTH = 160
 TEXT_LIMIT = 1500
 # A range longer than LONG_RANGE turns clips the replies before its last to SHORT_LIMIT.
@@ -54,112 +49,21 @@ SEARCH_HITS = 10
 SNIPPET_CONTEXT = 60
 
 
-class Turn:
-    """One prompt of the user and what the assistant did after it."""
-
-    def __init__(self, time, prompt):
-        self.time = time
-        self.prompt = prompt
-        # The last text the assistant wrote in this turn.
-        self.reply = ""
-        # What the turn ended on: "text", a tool name, or "" when nothing came.
-        self.last_block = ""
-        # Files edited or written, in the order first touched.
-        self.files = []
-        # Every text the assistant wrote and every tool call, in order, for --full.
-        self.steps = []
-        # Every text the assistant wrote, for --search --replies.
-        self.texts = []
-
-
-@functools.lru_cache(maxsize=None)
-def transcript_dir():
-    projects = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "projects"
-    current = os.environ.get("CLAUDE_CODE_SESSION_ID")
-    if current:
-        for hit in projects.glob(f"*/{current}.jsonl"):
-            return hit.parent
-    return projects / re.sub(r"[^A-Za-z0-9]", "-", os.getcwd())
-
-
-def previous_sessions():
-    """This project's transcripts other than the running chat's, newest first."""
-    folder = transcript_dir()
-    current = os.environ.get("CLAUDE_CODE_SESSION_ID")
-    return sorted(
-        (f for f in folder.glob("*.jsonl") if f.stem != current),
-        key=lambda f: f.stat().st_mtime,
-        reverse=True,
-    )
-
-
-def pick_session(prefix):
-    """The newest transcript whose id starts with `prefix`; the last chat's when it is None."""
-    sessions = [f for f in previous_sessions() if f.stem.startswith(prefix or "")]
-    if not sessions:
+def pick_chat(chats, prefix):
+    """The newest chat whose id starts with `prefix`; the last chat when it is None."""
+    ids = [i for i in chats.chat_ids() if i.startswith(prefix or "")]
+    if not ids:
         wanted = f"chat {prefix}" if prefix else "earlier chat"
-        sys.exit(f"no {wanted} in {transcript_dir()}")
-    return sessions[0]
+        sys.exit(f"no {wanted} in {chats.own_dir()}")
+    return ids[0]
 
 
-def records(path):
-    for line in path.open(encoding="utf-8"):
-        try:
-            yield json.loads(line)
-        except json.JSONDecodeError:
-            continue
-
-
-def prompt_text(content):
-    if isinstance(content, str):
-        parts = [content]
-    elif any(block.get("type") == "tool_result" for block in content):
-        return None
-    else:
-        parts = [block.get("text", "") for block in content if block.get("type") == "text"]
-    text = INJECTED.sub("", "\n".join(parts)).strip()
-    if not text or text.startswith("[Request interrupted"):
-        return None
-    return text
-
-
-def tool_call(block):
-    """One line for a tool call: its name and its most telling input."""
-    tool_input = block.get("input", {})
-    arg = next((tool_input[key] for key in TOOL_ARGS if isinstance(tool_input.get(key), str)), "")
-    return f"[{block['name']}] {clip(' '.join(arg.split()), LIST_WIDTH)}"
-
-
-def take_reply(turn, content):
-    for block in content:
-        if block.get("type") == "text" and block["text"].strip():
-            turn.reply = block["text"].strip()
-            turn.last_block = "text"
-            turn.steps.append(turn.reply)
-            turn.texts.append(turn.reply)
-        elif block.get("type") == "tool_use":
-            turn.last_block = block["name"]
-            turn.steps.append(tool_call(block))
-            path = block.get("input", {}).get("file_path")
-            if block["name"] in FILE_TOOLS and path and path not in turn.files:
-                turn.files.append(path)
-
-
-def read_session(path):
-    title, end, turns = "", "", []
-    for record in records(path):
-        kind = record.get("type")
-        end = record.get("timestamp", end)
-        if kind == "ai-title":
-            title = record.get("aiTitle", title)
-        if record.get("isSidechain") or record.get("isMeta") or record.get("isCompactSummary"):
-            continue
-        if kind == "user":
-            text = prompt_text(record["message"]["content"])
-            if text:
-                turns.append(Turn(record["timestamp"], text))
-        elif kind == "assistant" and turns:
-            take_reply(turns[-1], record["message"]["content"])
+def read_chat(chats, chat_id):
+    """The chat's title, end and turns, without the agent's own files among the changed ones."""
+    title, end, turns = chats.read_chat(chat_id)
+    scratch = {tempfile.gettempdir(), "/tmp", "/private/tmp", str(chats.own_dir())}
+    for turn in turns:
+        turn.files = [p for p in turn.files if not p.startswith(tuple(d + os.sep for d in scratch))]
     return title, end, turns
 
 
@@ -175,17 +79,18 @@ def relative(path):
     return os.path.relpath(path) if path.startswith(os.getcwd() + os.sep) else path
 
 
-def work_files(paths):
-    """`paths` without Claude's own scratch and memory files, which a recap leaves out."""
-    scratch = {tempfile.gettempdir(), "/tmp", "/private/tmp", str(transcript_dir())}
-    return [p for p in paths if not p.startswith(tuple(d + os.sep for d in scratch))]
+def step_text(step):
+    """A text as it is, a (tool, argument) pair as one line."""
+    if isinstance(step, str):
+        return step
+    tool, arg = step
+    return f"[{tool}] {clip(' '.join(arg.split()), LIST_WIDTH)}"
 
 
 def prompt_line(number, turn):
     marks = []
-    files = work_files(turn.files)
-    if files:
-        marks.append(f"{len(files)} file{'s' if len(files) > 1 else ''}")
+    if turn.files:
+        marks.append(f"{len(turn.files)} file{'s' if len(turn.files) > 1 else ''}")
     if not turn.last_block:
         marks.append("no answer")
     elif turn.last_block != "text":
@@ -215,13 +120,13 @@ def print_topic(turns, start, end, full):
             print("(no answer)\n")
             continue
         if full:
-            print("### Steps\n" + "\n\n".join(turn.steps) + "\n")
+            print("### Steps\n" + "\n\n".join(step_text(step) for step in turn.steps) + "\n")
         else:
             reply = turn.reply if number == end else clip(turn.reply, reply_limit)
             print(f"### Reply\n{reply or '(no text)'}\n")
             if turn.last_block != "text":
                 print(f"(the turn ended on a {turn.last_block} call; the reply above was written before it)\n")
-        files += [f for f in work_files(turn.files) if f not in files]
+        files += [f for f in turn.files if f not in files]
     if files:
         print(f"## Files changed in [{start}]-[{end}]\n" + "\n".join(relative(f) for f in files))
 
@@ -248,17 +153,17 @@ def reply_match(regex, turn):
     return ""
 
 
-def search(pattern, replies):
+def search(chats, pattern, replies):
     try:
         regex = re.compile(pattern, re.I)
     except re.error as error:
         sys.exit(f"bad pattern {pattern!r}: {error}")
     found = False
-    for path in previous_sessions():
-        title, end, turns = read_session(path)
+    for chat_id in chats.chat_ids():
+        title, end, turns = read_chat(chats, chat_id)
         hits = []
         for number, turn in enumerate(turns, 1):
-            files = [relative(f) for f in work_files(turn.files) if regex.search(f)]
+            files = [relative(f) for f in turn.files if regex.search(f)]
             in_prompt = bool(files or regex.search(turn.prompt))
             snippet = "" if in_prompt or not replies else reply_match(regex, turn)
             if in_prompt or snippet:
@@ -266,13 +171,13 @@ def search(pattern, replies):
         if not turns or not (hits or regex.search(title)):
             continue
         found = True
-        print(f'{path.stem[:8]}  {local(turns[0].time)} to {local(end)}  {len(turns)} prompts  "{title or "(no title)"}"')
+        print(f'{chat_id[:8]}  {local(turns[0].time)} to {local(end)}  {len(turns)} prompts  "{title or "(no title)"}"')
         for number, turn, files, snippet in hits[:SEARCH_HITS]:
             print("    " + prompt_line(number, turn) + (f"  [{', '.join(files)}]" if files else ""))
             if snippet:
                 print(f"        reply: {snippet}")
         if len(hits) > SEARCH_HITS:
-            print(f"    ... {len(hits) - SEARCH_HITS} more; --chat {path.stem[:8]} --from 1 --brief lists every prompt")
+            print(f"    ... {len(hits) - SEARCH_HITS} more; --chat {chat_id[:8]} --from 1 --brief lists every prompt")
     if not found:
         sys.exit(f"no earlier chat matches {pattern!r}")
 
@@ -293,24 +198,25 @@ def main():
     style.add_argument("--brief", action="store_true", help="with --from, one line per prompt")
     style.add_argument("--full", action="store_true", help="no clipping, and every text and tool call of each turn")
     args = parser.parse_args()
+    chats = claude_code_chats
 
     if args.search is not None:
         if args.chat or args.start is not None or args.end is not None or args.brief or args.full:
             parser.error("--search takes no other option but --replies")
-        search(args.search, args.replies)
+        search(chats, args.search, args.replies)
         return
     if args.replies:
         parser.error("--replies needs --search")
     if args.start is None and (args.end is not None or args.brief):
         parser.error("--to and --brief need --from")
-    path = pick_session(args.chat)
-    title, end, turns = read_session(path)
+    chat_id = pick_chat(chats, args.chat)
+    title, end, turns = read_chat(chats, chat_id)
     if not turns:
-        sys.exit(f"{path.name} holds no prompts")
+        sys.exit(f"chat {chat_id[:8]} holds no prompts")
     last = len(turns) if args.end is None else args.end
     if args.start is not None and not 1 <= args.start <= last <= len(turns):
         sys.exit(f"need 1 <= --from <= --to <= {len(turns)}")
-    print(f'Chat {path.stem[:8]} "{title}", {local(turns[0].time)} to {local(end)}, {len(turns)} prompts\n')
+    print(f'Chat {chat_id[:8]} "{title}", {local(turns[0].time)} to {local(end)}, {len(turns)} prompts\n')
     if args.start is None:
         print_overview(turns, args.full)
     elif args.brief:
