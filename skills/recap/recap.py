@@ -1,10 +1,33 @@
 #!/usr/bin/env python3
 """Shows a previous Claude Code chat of this project, for /recap.
 
-Without options it shows the last chat: the prompts before its last two turns,
-one line each, then those two turns in detail. --from N [--to M] prints a range
-of prompts in detail, or one line each with --brief. --search finds the earlier
-chats and prompts that match a topic.
+The chats are those of this project's transcript folder: every chat started in
+this directory, except the running one. A chat is named by the first 8
+characters of its id, and its prompts are numbered from 1.
+
+recap.py
+    The last chat: its last prompts one line each, then its last two turns in
+    detail. For the last topic of the last chat.
+
+recap.py --search PATTERN [--replies]
+    The earlier chats whose prompts, title or changed files match PATTERN, a
+    regex, case-insensitive. Newest chat first, each with its id, dates, title
+    and matching prompts. --replies also matches the assistant's replies and
+    shows the words around the match. For a named topic: pass the chat id to
+    --chat and the prompt numbers to --from and --to.
+
+recap.py [--chat ID] --from N [--to M] [--brief | --full]
+    Prompts N to M of the chat, default the last chat and its last prompt.
+    Each prompt comes with the last reply of its turn, clipped except for the
+    reply of M, then the files that the range changed. --brief prints one line
+    per prompt instead. --full prints each turn without clipping, with every
+    text and one line per tool call: use it when the replies do not show
+    where the work stopped.
+
+A prompt line reads "[N] HH:MM <prompt> (<marks>)". The marks give the number
+of files the turn changed, "no answer" when the assistant wrote nothing, and
+"ends on <tool>" when the turn ended on a tool call, e.g. when it was cut off.
+A note in the output tells how to see what it leaves out.
 """
 import argparse
 import functools
@@ -249,21 +272,23 @@ def search(pattern, replies):
             if snippet:
                 print(f"        reply: {snippet}")
         if len(hits) > SEARCH_HITS:
-            print(f"    ... {len(hits) - SEARCH_HITS} more")
+            print(f"    ... {len(hits) - SEARCH_HITS} more; --chat {path.stem[:8]} --from 1 --brief lists every prompt")
     if not found:
         sys.exit(f"no earlier chat matches {pattern!r}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    summary, _, usage = __doc__.partition("\n\n")
+    parser = argparse.ArgumentParser(description=summary, epilog=usage,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--search", metavar="PATTERN",
                         help="list the earlier chats and prompts whose text, title or changed files "
                              "match this regex, case-insensitive")
     parser.add_argument("--replies", action="store_true",
                         help="with --search, also match the assistant's replies")
-    parser.add_argument("--chat", help="the chat whose id starts with this, from --search; default the last chat")
-    parser.add_argument("--from", dest="start", type=int, help="print the prompts from this one on")
-    parser.add_argument("--to", dest="end", type=int, help="with --from, stop at this prompt; default the last")
+    parser.add_argument("--chat", metavar="ID", help="the chat whose id starts with this, from --search; default the last chat")
+    parser.add_argument("--from", dest="start", type=int, metavar="N", help="print the prompts from this one on")
+    parser.add_argument("--to", dest="end", type=int, metavar="M", help="with --from, stop at this prompt; default the last")
     style = parser.add_mutually_exclusive_group()
     style.add_argument("--brief", action="store_true", help="with --from, one line per prompt")
     style.add_argument("--full", action="store_true", help="no clipping, and every text and tool call of each turn")
