@@ -11,6 +11,7 @@ shared between machines.
 | `python-coding` | Python packages: `src` layout and `pyproject.toml`, one thing per module, `__init__.py` re-exports, strict mypy, ruff for formatting and linting, configuration as frozen dataclasses filled from argparse. |
 | `scripting` | Shell only for a few commands in a row, Python once a script gets complex; style for both. |
 | `recap` | Catches up on the last topic of a previous chat from its saved transcript, checked against git, and carries on with it when asked. |
+| `listen-tags` | Watches saved files for `@ai` comments and answers or applies each one in place, with an `@claude` reply under it. |
 | `memory-cleanup` | Prunes a project's memory to what the code and docs can't tell, then fixes its links and index. |
 | `commit` | Writes commit messages and PR titles and descriptions in English and Simplified Technical English. A subject line starts with a type tag (`[feat]`, `[fix]`, `[doc]`, `[refactor]`, `[test]` or `[chore]`) and a list of the changes follows it. |
 | `typst-assistant` | Watches a Typst project for `// @ai` notes in the source, does what each note asks, checks the rendered page and answers under the note. |
