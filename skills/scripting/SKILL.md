@@ -71,6 +71,9 @@ file, and that script is Python if it is complex.
 
 ## Python scripts
 
+These are for standalone scripts. Python code in a package, including its
+programs, follows `python-coding`.
+
 - `#!/usr/bin/env python3` on the first line, then a module docstring whose
   first line says what the script does; it doubles as the `--help` text
   (`argparse.ArgumentParser(description=__doc__.splitlines()[0])`).

@@ -8,6 +8,7 @@ shared between machines.
 | `coding-guidelines` | One file, one thing, and how to split a file; comments kept to a strict minimum. All languages. |
 | `cpp-coding` | Plain C++20, naming, data members via `this->`, library layout, includes, third-party frameworks as plain libraries. |
 | `rust-coding` | One thing per file in Rust terms, a trait apart from its impls, `mod.rs` with flat re-exports, visibility. |
+| `python-coding` | Python packages: `src` layout and `pyproject.toml`, one thing per module, `__init__.py` re-exports, strict mypy, ruff for formatting and linting, configuration as frozen dataclasses filled from argparse. |
 | `scripting` | Shell only for a few commands in a row, Python once a script gets complex; style for both. |
 | `recap` | Catches up on the last topic of a previous chat from its saved transcript, checked against git, and carries on with it when asked. |
 | `memory-cleanup` | Prunes a project's memory to what the code and docs can't tell, then fixes its links and index. |

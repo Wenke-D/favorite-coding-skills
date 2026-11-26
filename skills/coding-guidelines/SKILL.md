@@ -6,10 +6,11 @@ description: Coding rules for every project. They cover programming languages, s
 # Coding guidelines
 
 These hold for every language. A language skill (`cpp-coding` for C++,
-`rust-coding` for Rust) adds its own rules and wins where the two differ; a
-project's CLAUDE.md or memory wins over both. When writing C++ or Rust, load
-`cpp-coding` or `rust-coding` too; when writing a shell or Python script, load
-`scripting`.
+`rust-coding` for Rust, `python-coding` for Python) adds its own rules and
+wins where the two differ; a project's CLAUDE.md or memory wins over both.
+When writing C++, Rust or Python in a project or package, load `cpp-coding`,
+`rust-coding` or `python-coding` too; when writing a shell script or a
+standalone Python script, load `scripting`.
 
 ## One file, one thing
 
