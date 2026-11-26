@@ -35,9 +35,9 @@ Re-run it after adding a skill. In a running `agy`, run `/skills reload`
 after that. Editing a skill through either folder edits this repo; commit
 and push from here.
 
-`recap` reads the saved chats of both agents. For Antigravity it reads the
-CLI's own databases, whose format has no documentation, so a new CLI version
-can break it. `memory-cleanup` works on the memory folder of Claude Code.
+`recap` reads only the saved chats of the agent that runs it. For
+Antigravity it reads the CLI's own databases, whose format has no
+documentation, so a new CLI version can break it. `memory-cleanup` works on the memory folder of Claude Code.
 Antigravity has no memory folder of its own.
 
 ## Third-party skills

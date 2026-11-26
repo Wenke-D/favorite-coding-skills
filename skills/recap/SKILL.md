@@ -19,10 +19,8 @@ as `python3 <that folder>/recap.py`. `recap.py --help` shows what each
 command prints and what each option does. Run it when the output is not
 clear or you need another option.
 
-`recap.py` reads the chats of the agent that runs it, Claude Code or the
-Antigravity CLI. To read the chats of the other agent, add
-`--agent claude-code` or `--agent antigravity`. Do this when the user says
-that the earlier work was with the other agent.
+`recap.py` reads only the chats of the agent that runs it, Claude Code or the
+Antigravity CLI. It does not read the chats of the other agent.
 
 ## Topics
 
@@ -51,9 +49,8 @@ A topic covers these prompts:
 ## Recap with a topic
 
 1. Run `recap.py --search '<pattern>'`. If no chat matches, try other
-   words, such as related terms, synonyms or the other language. Then try
-   the other agent with `--agent`. Tell the user only when these also find
-   no chat.
+   words, such as related terms, synonyms or the other language. Tell the
+   user only when these also find no chat.
 2. Pick the chat that matches best. The topic starts at the prompt `N` that
    first raises it. To find where it ends, list the prompts of that chat
    with `recap.py --chat <id> --from N --brief`.
