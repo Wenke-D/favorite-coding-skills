@@ -1,98 +1,69 @@
 ---
 name: typst-assistant
-description: Watches the .typ files of a Typst project for "// @ai" notes that the user writes beside a line. Does what each note asks, renders the page to check the result, and answers in the file under the note. Use when the user wants to give feedback on Typst slides or documents in the source instead of the chat. Also use when the user runs /typst-assistant or asks to start the note watcher, e.g. "开批注监听", "看批注", "I'll comment in the source", "set up the listener like yesterday".
+description: Watches a Typst project's .typ files for "// @ai" comments written beside a line. Performs what each note asks, renders the affected page to verify the result, and replies directly in the file under the note. Use when the user wants to give feedback on Typst slides or documents inside the source instead of chat, or when they run /typst-assistant or ask to start the note watcher, e.g. "开批注监听", "看批注", "I'll comment in the source", "set up the listener like yesterday".
 ---
 
 # Typst assistant
 
-The user writes a note beside a line of a `.typ` file and saves the file:
+The user writes a note beside a line in a `.typ` file and saves it:
 
 ```typst
 - Our solver scales to 4k GPUs  // @ai too strong, soften it
 ```
 
-A watcher sends each new note to this session. You do what the note asks
-and answer in the file, under the note. Each discussion stays beside the
-text it is about.
+A background watcher sends each new note to this session. You act on the note and reply directly in the file below it, keeping every discussion next to the text it refers to.
 
 ## Steps
 
-1. Find the project: the folder with the `main.typ` of the file the user has
-   open, or the folder the user names. Note the folders that hold cut or
-   unused material, such as `dropped/`.
+1. Locate the project: the folder containing `main.typ` for the file the user has open, or the folder the user specifies. Note any folders for cut or unused material, such as `dropped/`.
 
-2. Start the watcher with the Monitor tool and `timeout_ms` 1800000, the
-   maximum:
+2. Start the watcher using the Monitor tool with `timeout_ms` set to `1800000` (the maximum):
 
    ```sh
    <skill base directory>/watch-notes.sh <project folder> [<folder to skip> ...]
    ```
 
-   It prints each new note as `path:line:text`, 2 seconds after the files
-   stop changing. Notes already in the files come first. After `@ai`, it
-   accepts a space, `:` or `：`, in any letter case.
+   It prints each new note as `path:line:text`, 2 seconds after file edits settle. Existing notes are printed first. After `@ai`, it accepts a space, `:`, or `：` (case-insensitive).
 
-3. Tell the user in a few lines how to write a note, with the example above.
-   A follow-up is a new `// @ai` line under your answer. The user tells you
-   when the notes are done.
+3. Tell the user in a few lines how to leave a note, including the example above. Explain that they can follow up with a new `// @ai` line below your reply, and let you know when they are done.
 
-4. For each note, from the top of the file:
-   1. Read the file around the line. A note can continue on the comment
-      lines under it.
-   2. Do what the note asks. Answer a question. If the note is not clear,
-      ask in your answer and change nothing.
-   3. If you changed the document, render the page and look at it (see
-      Render and check).
-   4. Change `// @ai <note>` to `// Q: <note>`, so that the watcher does not
-      send it again. On the next line, at the indent of the note's line,
-      write `// ↳ AI: <answer>`. Continue a long answer on more `//` lines.
-   5. In the chat, write one or two lines with a link to your answer. The
-      answer itself goes in the file.
+4. For each note, working from the top of the file downward:
+   1. Read the surrounding lines in the file. A note may continue across subsequent comment lines.
+   2. Act on the note or answer the question. If the note is unclear, ask for clarification in your reply without editing the document.
+   3. If you edited the document, render the affected page and inspect it (see Render and check).
+   4. Change `// @ai <note>` to `// Q: <note>` so the watcher does not report it again. On the next line, matching the note's indentation, write `// ↳ AI: <answer>`. Wrap long answers across additional `//` lines.
+   5. In the chat, post a one- or two-line summary with a link to your reply; keep the full answer in the file.
 
-5. When the watcher expires, start it again with the same command. After
-   three expiries in a row with no notes, stop. A note sets the count back
-   to zero. Tell the user to say
-   "开批注监听" when they want it again.
+5. When the watcher times out, restart it with the same command. Stop after three consecutive timeouts with no notes (any note resets the count to zero), and let the user know they can say `"开批注监听"` whenever they want to restart it.
 
-6. When the user says the notes are done, remove each `// Q:` comment and
-   the comment lines under it that continue the note or the answer. If a
-   `// Q:` comment follows code on the same line, remove only the comment.
+6. When the user says they are done, remove every `// Q:` comment along with any continuation lines for the note or reply. If `// Q:` sits at the end of a code line, remove only the comment.
 
 ## Render and check
 
-After each change, render the changed page and look at it before you
-answer.
+After every edit, render the changed page and visually inspect it before replying.
 
-1. Find the page. In a slide deck, this command lists each heading with its
-   page:
+1. Find the page number. In a slide deck, this command lists each heading with its page:
 
    ```sh
    typst eval --in main.typ '{ let t(c) = if c.has("text") { c.text } else if c.has("children") { c.children.map(t).join() } else { " " }; query(heading).map(h => str(h.location().page()) + " " + t(h.body)).join("\n") }' --format yaml
    ```
 
-   If `typst eval` is not available, count the pages before the slide.
+   If `typst eval` is unavailable, count the pages preceding the slide.
 
-2. Render that page into the scratchpad, then read the PNG. Typst writes
-   the page number, padded with zeros, in place of `{0p}`:
+2. Render that page into the scratchpad, then open the PNG. Typst substitutes the zero-padded page number for `{0p}`:
 
    ```sh
    typst compile main.typ <scratchpad>/p{0p}.png --pages <n> --ppi 160
    ```
 
-3. Check that text and code are readable, with enough contrast. Check for
-   content outside the page, bad alignment and large empty areas. Fix what
-   you see and render again.
+3. Verify that text and code are readable with adequate contrast, and check for overflow, misalignment, or awkward empty space. Fix any issues and re-render.
 
-4. Make sure that the compile gives no new errors or warnings.
+4. Verify that compiling produces no new errors or warnings.
 
 ## Rules
 
-- In a raw block (between backtick fences), `//` is not a comment, so a
-  note there shows on the page. Put the `// Q:` and `// ↳ AI:` lines above
-  the block, and remove the note from the block.
-- If the change removes the note's file from the document, write the
-  `// Q:` and `// ↳ AI:` lines where the file was included.
-- Follow the layout rules in the project's CLAUDE.md and memory.
-- Do not start `caffeinate` for the watcher. The user writes notes only
-  while the Mac is awake, so sleep loses no notes.
-- The watcher runs only while this session is open.
+- Inside a raw block (between backtick fences), `//` is not a comment, so a note there would render on the page. Place the `// Q:` and `// ↳ AI:` lines above the block and remove the note from inside it.
+- If an edit removes the note's file from the document, place the `// Q:` and `// ↳ AI:` lines where the file was included.
+- Follow the layout rules in the project's `CLAUDE.md` and memory.
+- Do not run `caffeinate` for the watcher. The user only writes notes while the Mac is awake, so sleep loses nothing.
+- The watcher only runs while this session remains open.

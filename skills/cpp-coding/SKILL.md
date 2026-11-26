@@ -5,76 +5,74 @@ description: Use alongside coding-guidelines for any C++ project (.cpp, .hpp) an
 
 # C++ style
 
-These rules cover a project's own C++ code. Load the general
-`coding-guidelines` skill too: these C++ rules win where the two differ. A
-project's CLAUDE.md or memory can add to both or override them; follow the
-project where they differ.
+These rules cover a project's own C++ code. Load `coding-guidelines` as well:
+these C++ rules take precedence where the two differ. A project's `CLAUDE.md`
+or memory can extend or override both; follow the project where they differ.
 
 ## Plain C++20
 
 - Use the standard library: `std::unique_ptr`, `std::string`, `std::vector`,
-  `std::optional`, and exceptions for errors.
-- `.hpp` / `.cpp` files, `#pragma once` in every header.
-- No run-time polymorphism, factory, registry or self-registration unless
-  there really are alternatives selected at run time. A free function, or a
-  plain name switch (`make_model(name)` with an `if` chain) for a handful of
-  fixed choices, is enough. The user removed a self-registering model
-  registry as "too heavy"; keep things that plain.
+  `std::optional`, and exceptions for error handling.
+- Use `.hpp` / `.cpp` files, with `#pragma once` in every header.
+- Avoid runtime polymorphism, factories, registries, or self-registration
+  unless alternatives genuinely need to be selected at runtime. A free
+  function, or a simple name dispatch (`make_model(name)` with an `if` chain)
+  for a handful of fixed choices, is enough. Avoid heavy self-registering
+  hierarchies.
 
 ## Naming
 
-- snake_case: executables, libraries, directories, source files, functions,
-  variables (in C++ and in CMake): `hello_foam`, `libhello`, `my_rank`,
-  `make_combustion_model()`. The user dislikes camelCase there.
-- UpperCamelCase: class and type names, acronyms kept as written:
+- `snake_case` for executables, libraries, directories, source files,
+  functions, and variables (in both C++ and CMake): `hello_foam`, `libhello`,
+  `my_rank`, `make_combustion_model()`. Avoid `camelCase` for these.
+- `UpperCamelCase` for class and type names, keeping acronyms as written:
   `FlameletTable`, `EDC`, `FSD`.
-- Names owned by someone else keep their spelling: a third-party API
-  (`UPstream::nProcs()`), keys an input file uses, log text that results are
-  compared against.
+- Preserve external spellings: third-party APIs (`UPstream::nProcs()`), keys in
+  input files, and log text compared against expected outputs.
 
 ## Data members
 
-- A class's data members are snake_case with a trailing underscore:
+- Name class data members in `snake_case` with a trailing underscore:
   `delta_ratio_`, `cell_point_`.
-- Inside member functions, always refer to data members through `this->`
-  (`this->delta_ratio_`, `this->grid_.shape()`), never by bare name, so a
-  member never reads like a local. This covers members inherited from a
-  framework base too, which keep their own spelling (`this->wFuel_`).
-- A plain struct of public fields (`GridTensor`, a `Coeffs` or `Inputs`
-  struct) keeps plain snake_case names without the underscore, as callers
-  write `coeffs.delta_l`; its own member functions still use `this->`.
+- Inside member functions, always access data members via `this->`
+  (`this->delta_ratio_`, `this->grid_.shape()`), never by bare name, so members
+  never look like local variables. This includes members inherited from a
+  framework base class, which keep their original spelling (`this->wFuel_`).
+- Plain structs of public fields (`GridTensor`, or a `Coeffs` / `Inputs`
+  struct) use plain `snake_case` without a trailing underscore so callers write
+  `coeffs.delta_l`; their own member functions still use `this->`.
 
 ## Layout
 
-- All code under `src/`, each library and each executable in its own
-  directory; tests in `tests/`. Use CMake's default output layout (no
-  `bin/` or `lib/` overrides).
-- A library has `include/<name>/` for its public headers and `src/` for its
-  sources and private headers. Only its own `include/` is PUBLIC on its
-  include path, so consumers write `#include <name/header.hpp>`.
-- Never put the project-wide `src/` on an include path: it lets every
-  consumer see every library's headers.
+- Place all code under `src/`, with each library and executable in its own
+  directory, and tests under `tests/`. Use CMake's default output layout (do
+  not override `bin/` or `lib/`).
+- Each library puts public headers in `include/<name>/` and sources and private
+  headers in `src/`. Expose only its own `include/` as `PUBLIC` on its include
+  path so consumers write `#include <name/header.hpp>`.
+- Never add the project-wide `src/` directory to an include path, as that
+  exposes every library's internal headers to every consumer.
 
 ## Includes
 
-- `""` only for a header of the same target; `<>` for everything else: the
-  project's other libraries, third-party headers, the standard library.
-  This departs from the Google style on purpose.
-- Exception: a framework file meant to be `#include`d textually inside a
-  function body (OpenFOAM's `postProcess.H`-style snippets) keeps `""`.
+- Use `""` only for headers in the same target, and `<>` for everything else:
+  other project libraries, third-party headers, and the standard library. (This
+  intentionally departs from Google C++ style.)
+- Exception: framework files meant to be `#include`d textually inside a
+  function body (such as OpenFOAM's `postProcess.H`-style snippets) keep `""`.
 
 ## Third-party frameworks are just libraries
 
-- A framework (OpenFOAM, Qt, ...) is a library the project links. Its
-  directory layout, build system, naming, macros, container and smart
-  pointer types and run-time selection are not the project's style. For
-  OpenFOAM that means no `TypeName`, `declareRunTimeSelectionTable`,
-  `dictionary`-driven selection or `autoPtr` in the project's own code.
-- Follow the framework's conventions only where code must plug into it
-  (deriving from its base class, implementing its interface), and then only
-  as far as plugging in requires.
-- Qualify its names explicitly (`Foam::argList`); no `using namespace` for
-  the framework.
-- Before writing a class, ask "does this need to be a framework class?" If
-  not, write plain C++. Don't justify a choice by "the framework does it
-  this way".
+- Treat a framework (OpenFOAM, Qt, etc.) as a library the project links
+  against. Its directory layout, build system, naming, macros, containers,
+  smart pointers, and runtime selection are not the project's style. For
+  OpenFOAM, avoid `TypeName`, `declareRunTimeSelectionTable`,
+  `dictionary`-driven selection, and `autoPtr` in project code.
+- Follow the framework's conventions only at the boundary where code must plug
+  into it (deriving from its base class or implementing its interface), and
+  only as far as required.
+- Qualify framework names explicitly (`Foam::argList`); never use
+  `using namespace` for a framework.
+- Before writing a class, ask whether it actually needs to be a framework
+  class. If not, write plain C++. Do not justify a design choice simply because
+  the framework does it that way.
